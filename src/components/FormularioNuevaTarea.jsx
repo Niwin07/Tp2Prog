@@ -16,21 +16,17 @@ export default function FormularioNuevaTarea({ alAgregarTarea }) {
 
         setLoading(true);
         try {
-            const exito = await alAgregarTarea(datos);
-            if (exito) {
-                setDato('descripcion', '');
-                alert('Tarea agregada exitosamente');
-                // Opcional: redirigir a la lista después de agregar
-                // setLocation('/lista-tareas');
-            } else {
-                alert('Error al agregar la tarea. Intenta nuevamente.');
-            }
+            await alAgregarTarea(datos);
+            setDato('descripcion', '');
+            setDato('prioridad', 'Media');
+            setDato('categoria', 'Trabajo');
+            alert('Tarea agregada exitosamente');
         } catch (error) {
             alert('Error al agregar la tarea. Intenta nuevamente.');
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return(
         <div className='formulario-contenedor'>

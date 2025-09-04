@@ -16,9 +16,10 @@ export default function ElementoTarea({ tarea, alEliminarTarea, alActualizarEsta
 
       <div className="tarea-detalles">
         <span className="etiqueta-categoria">{tarea.categoria}</span>
-        <span className={`etiqueta-prioridad prioridad-${tarea.prioridad.toLowerCase()}`}>
-          {tarea.prioridad}
+        <span className={`etiqueta-prioridad prioridad-${(tarea.prioridad || '').toLowerCase()}`}>
+          {tarea.prioridad || 'Sin prioridad'}
         </span>
+        
       </div>
 
       <div className="tarea-acciones">

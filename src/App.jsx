@@ -31,12 +31,10 @@ function App() {
 
   const agregarTarea = async (tarea) => {
     try {
-      const nuevaTarea = await crearTarea(tarea);
-      setTareas(prevTareas => [...prevTareas, nuevaTarea]);
-      return true; // Indicar éxito
+      await crearTarea(tarea);
+      await cargarTareas();
     } catch (error) {
       console.error('Error al agregar tarea:', error);
-      return false; // Indicar error
     }
   };
 
