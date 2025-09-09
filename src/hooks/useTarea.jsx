@@ -6,20 +6,20 @@ export default function useTarea() {
     const [categoria, setCategoria] = useState("Trabajo");
 
     const setDato = (campo, valor) => {
-        switch (campo){
-         case 'descripcion':
-             setDescripcion(valor);
-         break;
-         case 'prioridad':
+        switch (campo) {
+            case 'descripcion':
+                setDescripcion(valor);
+                break;
+            case 'prioridad':
                 setPrioridad(valor);
-         break;
-         case 'categoria':
+                break;
+            case 'categoria':
                 setCategoria(valor);
-         break;
-         default:
-         break;
+                break;
+            default:
+                break;
         }
-    }
+    };
 
-    return [{descripcion, prioridad, categoria}, setDato];
+    return [{ descripcion, prioridad, categoria }, setDato];
 }
