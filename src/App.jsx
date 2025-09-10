@@ -9,128 +9,97 @@ import Filtros from './components/Filtros.jsx';
 function App() {
   const [tareas, setTareas] = useState([]);
   const [categoriaActiva, setCategoriaActiva] = useState('Todas');
-  const [loading, setLoading] = useState(false);
-
-  // Configuración de la API
   const API_BASE_URL = 'https://api-tareas.ctpoba.edu.ar/v1';
   const API_TOKEN = '47811521';
 
-  // Cargar tareas al iniciar la aplicación
-  useEffect(() => {
-    cargarTareas();
-  }, []);
+useEffect(() => {
+  cargarTareas(categoriaActiva);
+}, [categoriaActiva]);
 
-  // Función para obtener todas las tareas
-  const cargarTareas = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_BASE_URL}/tareas/`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': API_TOKEN,
-        },
-        timeout: 10000,
-      });
-
-      const tareasObtenidas = (response.data.tareas || []).map(t => ({
-        ...t,
-        id: t._id,
-      }));
-      
-      setTareas(tareasObtenidas);
-    } catch (error) {
-      console.error('Error al cargar tareas:', error);
-      alert('Error al cargar las tareas. Verifica tu conexión.');
-    } finally {
-      setLoading(false);
+const cargarTareas = async (categoria = 'Todas') => {
+  try {
+    let params = {
+      limit: 9999999,
+      offset: 0
+    };
+    if (categoria !== 'Todas') {
+      params.busqueda = categoria;
     }
-  };
+    const response = await axios.get(`${API_BASE_URL}/tareas/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': API_TOKEN,
+      },
+      params,
+      timeout: 10000,
+    });
 
-  // Función para crear una nueva tarea
+    const tareasObtenidas = (response.data.tareas || []).map(t => ({
+      ...t,
+      id: t._id,
+    }));
+    setTareas(tareasObtenidas);
+  } catch (error) {
+    console.error('Error al cargar tareas:', error);
+    alert('Error al cargar las tareas. Que pasho papu');
+  }
+};
+
   const agregarTarea = async (tarea) => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/tareas/`, tarea, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': API_TOKEN,
-        },
-        timeout: 10000,
-      });
+  try {
+    await axios.post(`${API_BASE_URL}/tareas/`, tarea, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': API_TOKEN,
+      },
+      timeout: 10000,
+    });
+    await cargarTareas(categoriaActiva);
+  } catch (error) {
+    console.error('Error al agregar tarea:', error);
+    throw error;
+  }
+};
 
-      // Recargar las tareas después de crear una nueva
-      await cargarTareas();
-    } catch (error) {
-      console.error('Error al agregar tarea:', error);
-      throw error; // Para que el formulario pueda manejar el error
-    }
-  };
-
-  // Función para eliminar una tarea
   const eliminarTareaHandler = async (idTarea) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/tareas/${idTarea}/`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': API_TOKEN,
-        },
-        timeout: 10000,
-      });
+  try {
+    await axios.delete(`${API_BASE_URL}/tareas/${idTarea}/`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': API_TOKEN,
+      },
+      timeout: 10000,
+    });
+    await cargarTareas(categoriaActiva);
+  } catch (error) {
+    console.error('Error al eliminar tarea:', error);
+    alert('Error al eliminar la tarea. Intenta nuevamente.');
+  }
+};
 
-      // Actualizar el estado local eliminando la tarea
-      setTareas(prevTareas => prevTareas.filter(tarea => tarea.id !== idTarea));
-    } catch (error) {
-      console.error('Error al eliminar tarea:', error);
-      alert('Error al eliminar la tarea. Intenta nuevamente.');
-    }
-  };
-
-  // Función para actualizar el estado de una tarea
   const actualizarEstadoTarea = async (idTarea, nuevoEstado) => {
-    try {
-      const tareaActual = tareas.find(t => t.id === idTarea);
-      const tareaActualizada = {
-        ...tareaActual,
-        estado: nuevoEstado,
-        completada: nuevoEstado === 'Finalizado'
-      };
-      
-      await axios.put(`${API_BASE_URL}/tareas/${idTarea}/`, tareaActualizada, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': API_TOKEN,
-        },
-        timeout: 10000,
-      });
-      
-      // Actualizar el estado local
-      setTareas(prevTareas => 
-        prevTareas.map(tarea => 
-          tarea.id === idTarea ? tareaActualizada : tarea
-        )
-      );
-    } catch (error) {
-      console.error('Error al actualizar tarea:', error);
-      alert('Error al actualizar la tarea. Intenta nuevamente.');
-    }
-  };
+  try {
+    const tareaActual = tareas.find(t => t.id === idTarea);
+    const tareaActualizada = {
+      ...tareaActual,
+      estado: nuevoEstado,
+      completada: nuevoEstado === 'Finalizado'
+    };
+    await axios.put(`${API_BASE_URL}/tareas/${idTarea}/`, tareaActualizada, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': API_TOKEN,
+      },
+      timeout: 10000,
+    });
+    await cargarTareas(categoriaActiva);
+  } catch (error) {
+    console.error('Error al actualizar tarea:', error);
+    alert('Error al actualizar la tarea. Intenta nuevamente.');
+  }
+};
 
-  // Filtrar tareas por categoría
-  const tareasFiltradas = categoriaActiva === 'Todas'
-    ? tareas
-    : tareas.filter(tarea => tarea.categoria === categoriaActiva);
 
-  // Ordenar tareas por prioridad
-  const ordenPrioridad = {
-    "Alta": 1,
-    "Media": 2,
-    "Baja": 3
-  };
-
-  const tareasOrdenadasYFiltradas = tareasFiltradas.sort((a, b) => {
-    return ordenPrioridad[a.prioridad] - ordenPrioridad[b.prioridad];
-  });
-
-  // Componente de navegación
   function Navegacion() {
     const [location] = useLocation();
     
@@ -146,7 +115,6 @@ function App() {
     );
   }
 
-  // Página del formulario
   function PaginaFormulario() {
     return (
       <div className='gestor-tareas-app'>
@@ -165,8 +133,17 @@ function App() {
     );
   }
 
-  // Página de la lista
-  function PaginaLista() {
+
+function PaginaLista() {
+    const ordenPrioridad = {
+      "Alta": 1,
+      "Media": 2,
+      "Baja": 3
+    };
+    const tareasOrdenadas = [...tareas].sort((a, b) => {
+      return ordenPrioridad[a.prioridad] - ordenPrioridad[b.prioridad];
+    });
+
     return (
       <div className='gestor-tareas-app'>
         <div className='panel-control'>
@@ -178,9 +155,8 @@ function App() {
           />
         </div>
         <div className='panel-contenido'>
-          <h2>Tareas {loading && '(Cargando...)'}</h2>
           <ListaTareas 
-            tareas={tareasOrdenadasYFiltradas} 
+            tareas={tareasOrdenadas} 
             alEliminarTarea={eliminarTareaHandler}
             alActualizarEstado={actualizarEstadoTarea}
           />
@@ -189,13 +165,13 @@ function App() {
     );
   }
 
+
   return (
     <Router>
       <Route path="/nueva-tarea" component={PaginaFormulario} />
       <Route path="/lista-tareas" component={PaginaLista} />
       <Route path="/">
         {() => {
-          // Redirigir a nueva-tarea por defecto
           window.location.href = '/nueva-tarea';
           return null;
         }}
@@ -203,5 +179,4 @@ function App() {
     </Router>
   );
 }
-
 export default App;

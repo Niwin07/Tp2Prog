@@ -28,7 +28,7 @@ export default function ElementoTarea({ tarea, alEliminarTarea, alActualizarEsta
           value={tarea.estado}
           onChange={(e) => alActualizarEstado(tarea.id, e.target.value)}
         >
-          <option value="Pendiente">Pendiente</option>
+          <option value="Pendiente">Pendientes</option>
           <option value="En Proceso">En Proceso</option>
           <option value="Finalizado">Finalizado</option>
         </select>
